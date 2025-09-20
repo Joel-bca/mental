@@ -1,0 +1,282 @@
+**<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Test - Mental Health Tracker</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #E0F2FE 0%, #F0F9FF 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #0ea5e9;
+        }
+        .success { border-left-color: #22c55e; background: #f0fdf4; }
+        .error { border-left-color: #ef4444; background: #fef2f2; }
+        .warning { border-left-color: #f59e0b; background: #fffbeb; }
+        button {
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0284c7; }
+        .status { padding: 8px 16px; border-radius: 20px; font-size: 14px; }
+        .status.success { background: #dcfce7; color: #166534; }
+        .status.error { background: #fecaca; color: #991b1b; }
+        .status.warning { background: #fed7aa; color: #9a3412; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Mental Health Tracker - Setup Test</h1>
+        <p>This page helps you test if your setup is working correctly.</p>
+
+        <div class="test-section" id="supabase-test">
+            <h3>🔧 Supabase Configuration Test</h3>
+            <div id="supabase-status" class="status warning">Testing...</div>
+            <button onclick="testSupabase()">Test Supabase Connection</button>
+            <div id="supabase-result"></div>
+        </div>
+
+        <div class="test-section" id="auth-test">
+            <h3>🔐 Authentication Test</h3>
+            <div id="auth-status" class="status warning">Not tested</div>
+            <button onclick="testAuth()">Test Authentication</button>
+            <div id="auth-result"></div>
+        </div>
+
+        <div class="test-section" id="database-test">
+            <h3>🗄️ Database Test</h3>
+            <div id="database-status" class="status warning">Not tested</div>
+            <button onclick="testDatabase()">Test Database</button>
+            <div id="database-result"></div>
+        </div>
+
+        <div class="test-section" id="voice-test">
+            <h3>🎤 Voice Recognition Test</h3>
+            <div id="voice-status" class="status warning">Not tested</div>
+            <button onclick="testVoice()">Test Voice Recognition</button>
+            <div id="voice-result"></div>
+        </div>
+
+        <div class="test-section" id="css-test">
+            <h3>🎨 CSS Test</h3>
+            <div id="css-status" class="status warning">Not tested</div>
+            <button onclick="testCSS()">Test CSS Loading</button>
+            <div id="css-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Next Steps</h3>
+            <ol>
+                <li>Run each test above to identify any issues</li>
+                <li>Check the browser console (F12) for detailed error messages</li>
+                <li>Follow the setup instructions in README.md</li>
+                <li>Once all tests pass, try the main application</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Load setup script -->
+    <script src="setup.js"></script>
+
+    <script>
+        // Test functions
+        async function testSupabase() {
+            const status = document.getElementById('supabase-status');
+            const result = document.getElementById('supabase-result');
+
+            status.textContent = 'Testing...';
+            status.className = 'status warning';
+
+            try {
+                if (!window.supabase) {
+                    throw new Error('Supabase not initialized. Check your configuration in index.html');
+                }
+
+                const { data, error } = await window.supabase.auth.getSession();
+                if (error) throw error;
+
+                status.textContent = '✅ Connected';
+                status.className = 'status success';
+                result.innerHTML = '<p>✅ Supabase connection successful!</p>';
+
+            } catch (error) {
+                status.textContent = '❌ Failed';
+                status.className = 'status error';
+                result.innerHTML = `<p>❌ Error: ${error.message}</p>`;
+                console.error('Supabase test failed:', error);
+            }
+        }
+
+        async function testAuth() {
+            const status = document.getElementById('auth-status');
+            const result = document.getElementById('auth-result');
+
+            status.textContent = 'Testing...';
+            status.className = 'status warning';
+
+            try {
+                // Test signup with a test email
+                const testEmail = 'test-' + Date.now() + '@example.com';
+                const testPassword = 'testpass123';
+
+                const { data, error } = await window.supabase.auth.signUp({
+                    email: testEmail,
+                    password: testPassword
+                });
+
+                if (error) throw error;
+
+                status.textContent = '✅ Working';
+                status.className = 'status success';
+                result.innerHTML = `
+                    <p>✅ Authentication working!</p>
+                    <p>📧 Check your email for verification link</p>
+                    <small>Test email: ${testEmail}</small>
+                `;
+
+            } catch (error) {
+                status.textContent = '❌ Failed';
+                status.className = 'status error';
+                result.innerHTML = `<p>❌ Error: ${error.message}</p>`;
+                console.error('Auth test failed:', error);
+            }
+        }
+
+        async function testDatabase() {
+            const status = document.getElementById('database-status');
+            const result = document.getElementById('database-result');
+
+            status.textContent = 'Testing...';
+            status.className = 'status warning';
+
+            try {
+                // Try to query mood_entries table
+                const { data, error } = await window.supabase
+                    .from('mood_entries')
+                    .select('count', { count: 'exact', head: true });
+
+                if (error) {
+                    if (error.message.includes('relation "mood_entries" does not exist')) {
+                        throw new Error('Database tables not created. Run the SQL setup in Supabase.');
+                    }
+                    throw error;
+                }
+
+                status.textContent = '✅ Working';
+                status.className = 'status success';
+                result.innerHTML = '<p>✅ Database tables exist and accessible!</p>';
+
+            } catch (error) {
+                status.textContent = '❌ Failed';
+                status.className = 'status error';
+                result.innerHTML = `<p>❌ Error: ${error.message}</p>`;
+                console.error('Database test failed:', error);
+            }
+        }
+
+        function testVoice() {
+            const status = document.getElementById('voice-status');
+            const result = document.getElementById('voice-result');
+
+            status.textContent = 'Testing...';
+            status.className = 'status warning';
+
+            try {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+                if (!SpeechRecognition) {
+                    throw new Error('Speech Recognition not supported in this browser. Try Chrome.');
+                }
+
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'en-US';
+
+                recognition.onstart = () => {
+                    status.textContent = '✅ Supported';
+                    status.className = 'status success';
+                    result.innerHTML = '<p>✅ Voice recognition is supported!</p>';
+                    recognition.stop(); // Stop immediately after confirming support
+                };
+
+                recognition.onerror = (event) => {
+                    throw new Error(`Voice recognition error: ${event.error}`);
+                };
+
+                recognition.start();
+
+            } catch (error) {
+                status.textContent = '❌ Failed';
+                status.className = 'status error';
+                result.innerHTML = `<p>❌ Error: ${error.message}</p>`;
+                console.error('Voice test failed:', error);
+            }
+        }
+
+        function testCSS() {
+            const status = document.getElementById('css-status');
+            const result = document.getElementById('css-result');
+
+            status.textContent = 'Testing...';
+            status.className = 'status warning';
+
+            try {
+                // Check if Tailwind classes are working
+                const testElement = document.createElement('div');
+                testElement.className = 'bg-sky-500 text-white p-4 rounded-lg';
+                testElement.textContent = 'CSS Test';
+
+                document.body.appendChild(testElement);
+
+                // Check computed styles
+                const computedStyle = window.getComputedStyle(testElement);
+                const bgColor = computedStyle.backgroundColor;
+                const color = computedStyle.color;
+
+                document.body.removeChild(testElement);
+
+                if (bgColor.includes('rgb(14, 165, 233)') && color.includes('rgb(255, 255, 255)')) {
+                    status.textContent = '✅ Working';
+                    status.className = 'status success';
+                    result.innerHTML = '<p>✅ CSS/Tailwind is working correctly!</p>';
+                } else {
+                    throw new Error('Tailwind classes not applied correctly');
+                }
+
+            } catch (error) {
+                status.textContent = '❌ Failed';
+                status.className = 'status error';
+                result.innerHTML = `<p>❌ Error: ${error.message}</p>`;
+                console.error('CSS test failed:', error);
+            }
+        }
+
+        // Auto-run some tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testCSS(); // Test CSS immediately
+                testVoice(); // Test voice recognition
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
